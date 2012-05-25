@@ -2,19 +2,12 @@ var GLOBAL = {
 	nextFruit: null
 }
 function new_game() {
-	var board = get_board();
-	var fruits = []
-	var allfruits = 0;
-	for(var i=0;i<get_number_of_item_types();i++) {
-		fruits.push(get_total_item_count(i+1));
-		allfruits += get_total_item_count(i+1);
-	}
-	GLOBAL.nextFruit = nearest();
+	// GLOBAL.nextFruit = nearest();
 }
 
 function make_move() {
+	// console.log(nearest(),branch(GLOBAL.board,get_my_x(),get_my_y()));
 	var board = get_board();
-	var nextFruit = nearest();
 	var up = NORTH;
 	var down = SOUTH;
 	var left = WEST;
@@ -27,28 +20,39 @@ function make_move() {
 		x:get_opponent_x(),
 		y:get_opponent_y()
 	};
+	//bugfix: enemy took my fruit! >:(
+	//bugfix 2!: has_item appears to be based off of the initial map. LIES! So instead we refer to local board, which is kind enough to update itself.
+	if(!GLOBAL.nextFruit || board[GLOBAL.nextFruit[0]][GLOBAL.nextFruit[1]] === 0) {
+		GLOBAL.nextFruit = nearest();
+	}
 	// we found an item! take it!
 	if (board[my.x][my.y] > 0) {
 		GLOBAL.nextFruit = nearest();
+		console.log("take")
 		 return TAKE;
 	}
 	if(my.x < GLOBAL.nextFruit[0]) {
+		console.log("right")
 		return right;
 	}
 	if(my.x > GLOBAL.nextFruit[0]) {
+		console.log("left")
 		return left;
 	}
 	if(my.y < GLOBAL.nextFruit[1]) {
+		console.log("down")
 		return down;
 	}
 	if(my.y > GLOBAL.nextFruit[1]) {
+		console.log("up")
 		return up;
 	}
 
+	console.log("PASS",nearest(),my,get_my_x(),get_my_y())
 	return PASS;
 }
 function nearest() {
-	var paths = branch(get_board(),get_my_x(),get_my_y());
+	var paths = branch();
 	var min = function(arr) {
 		var min = arr[0];
 		var len = arr.length;
@@ -66,7 +70,7 @@ function nearest() {
 
 	return [min(paths).x,min(paths).y];
 }
-function branch(tree,x,y) {
+function branch(x,y) {
 	var board = get_board();
 	var fruits = []
 	var allfruits = 0;
@@ -76,14 +80,14 @@ function branch(tree,x,y) {
 	}
 	var top = 0;
 	var left = 0;
-	var right = tree.length;
-	var bottom = tree[0].length;
+	var right = board.length;
+	var bottom = board[0].length;
 	var visited = [];
 	var found = [];
 	var moveList = {};
 	var u = d = l = r = 0;
 	var hasFruit = function(x,y) {
-		if (tree[x][y] > 0) {
+		if (board[x][y] > 0) {
 			return true;
 		}
 		return false;
@@ -164,8 +168,8 @@ function branch(tree,x,y) {
 			move(x,y+1,moves+1);
 		}
 	};
-	move(x,y,0);
+	move(get_my_x(),get_my_y(),0);
 	// console.log(allfruits,found.length,fruits,moveList)
 	return found;
 }
-//branch(get_board(),get_my_x(),get_my_y())
+//branch(get_my_x(),get_my_y())
