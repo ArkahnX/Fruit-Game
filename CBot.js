@@ -4,7 +4,7 @@ var shortcut = false;
 
 function new_game() {
 	if (fruitLeft()) {
-		var shortcut = false;
+		shortcut = false;
 		var itemAmounts = [];
 		var itemTypes = get_number_of_item_types();
 		for (var i = 0; i < itemTypes; i++) {
@@ -35,35 +35,50 @@ function itemLocations() {
 	var ylength = board[0].length;
 	for (var i = 0; i < xlength; i++) {
 		for (var q = 0; q < ylength; q++) {
-			if (shortcut) {
-				if (board[i][q] !== 0) {
-					locationsArray.push([i, q]);
+			if(board[i][q] > 0) {
+				if(!locationsArray[board[i][q]-1]) {
+					locationsArray[board[i][q]-1] = [];
 				}
-			} else {
-				if (shortcutItems.indexOf(board[i][q]) > -1) {
-					locationsArray.push([i, q]);
-				}
+				locationsArray[board[i][q]-1].push([i, q]);
 			}
 		}
 	}
-	if (locationsArray.length === 0) {
-		shortcut = true;
-		return itemLocations();
+	var newLocations = [];
+	for (var i = 0; i < locationsArray.length; i++) {
+		if(locationsArray[i]) {
+			newLocations.push(locationsArray[i]);
+		}
 	}
-	return locationsArray;
+	return newLocations;
+}
+function shouldCollect(item) {
+	var itemTypes = get_number_of_item_types();
+	if(item <= Math.ceil(itemTypes/2)) {
+		if(get_my_item_count(item) > (get_total_item_count(item)/2) || get_my_item_count(item) > (get_total_item_count(item)/2)) {
+			return false;
+		}
+		return true;
+	}
+	return false;
 }
 
 function make_move() {
 	if (fruitLeft()) {
 		var board = get_board();
-		// we found an item! take it!
 		var index = min();
+		var targetx = index[0];
+		var targety = index[1];
+		// we found an item! take it!
 		if (board[get_my_x()][get_my_y()] > 0) {
 			return TAKE;
 		}
-		// Takes the resulting one
-		var targetx = index[0];
-		var targety = index[1];
+		if(get_my_x() === targetx && get_my_y() === targety) {
+			return TAKE;
+		}
+		if(board[get_my_x()+1] && board[get_my_x()+1][get_my_y()] > 0 && shouldCollect(board[get_my_x()+1][get_my_y()])) return EAST;
+		if(board[get_my_x()-1] && board[get_my_x()-1][get_my_y()] > 0 && shouldCollect(board[get_my_x()-1][get_my_y()])) return WEST;
+		if(board[get_my_x()][get_my_y()+1] && board[get_my_x()][get_my_y()+1] > 0 && shouldCollect(board[get_my_x()][get_my_y()+1])) return SOUTH;
+		if(board[get_my_x()][get_my_y()-1] && board[get_my_x()][get_my_y()-1] > 0 && shouldCollect(board[get_my_x()][get_my_y()-1])) return NORTH;
 		// Movement
 		if (get_my_y() > targety) return NORTH;
 		if (get_my_y() < targety) return SOUTH;
@@ -75,14 +90,14 @@ function make_move() {
 
 function min() {
 	items = itemLocations();
-	var min = Math.abs(items[0][0] - get_my_x()) + Math.abs(items[0][1] - get_my_y());
+	var min = Math.abs(items[0][0][0] - get_my_x()) + Math.abs(items[0][0][1] - get_my_y());
 	var minIndex = 0;
-	for (var i = 1; i < items.length; i++) {
-		var newMin = Math.abs(items[i][0] - get_my_x()) + Math.abs(items[i][1] - get_my_y());
+	for (var i = 1; i < items[0].length; i++) {
+		var newMin = Math.abs(items[0][i][0] - get_my_x()) + Math.abs(items[0][i][1] - get_my_y());
 		if (newMin < min) {
 			min = newMin;
 			minIndex = i;
 		}
 	}
-	return items[minIndex];
+	return items[0][minIndex];
 }
