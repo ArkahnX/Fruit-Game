@@ -89,12 +89,13 @@ function make_move() {
 }
 
 function min() {
+	var board = get_board();
 	items = itemLocations();
 	var min = Math.abs(items[0][0][0] - get_my_x()) + Math.abs(items[0][0][1] - get_my_y());
 	var minIndex = 0;
 	for (var i = 1; i < items[0].length; i++) {
 		var newMin = Math.abs(items[0][i][0] - get_my_x()) + Math.abs(items[0][i][1] - get_my_y());
-		if (newMin < min) {
+		if (newMin < min && shouldCollect(board[items[0][i][0]][items[0][i][1]])) {
 			min = newMin;
 			minIndex = i;
 		}
