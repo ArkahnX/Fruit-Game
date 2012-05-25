@@ -1,6 +1,9 @@
 function new_game() {
+	items = itemLocations();
+	shortcut = true;
 }
 var items = [];
+var shortcut = false;
 function itemLocations() {
 	var locationsArray = [];
 	var board = get_board();
@@ -8,15 +11,12 @@ function itemLocations() {
 	var ylength = board[0].length;
 	for(var i=0;i<xlength;i++){
 		for(var q=0;q<ylength;q++){
-			if (board[i][q] === 1 || board[i][q] === 2) {
-				locationsArray.push([i,q]);
-			}
-		}
-	}
-	if(locationsArray.length === 0) {
-		for(var i=0;i<xlength;i++){
-			for(var q=0;q<ylength;q++){
+			if(shortcut && locationsArray.length === 0) {
 				if (board[i][q] !== 0) {
+					locationsArray.push([i,q]);
+				}
+			} else {
+				if (board[i][q] === 1 || board[i][q] === 2) {
 					locationsArray.push([i,q]);
 				}
 			}
@@ -32,7 +32,6 @@ function make_move() {
 		return TAKE;
 	}
 	var index = min();
-
 
 	// Takes the resulting one
 	var targetx = index[0];
