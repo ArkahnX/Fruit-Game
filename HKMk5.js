@@ -68,7 +68,6 @@ function itemLocations() {
 			newLocations.push(locationsArray[i]);
 		}
 	}
-	console.log(newLocations)
 	return newLocations;
 }
 
@@ -89,7 +88,6 @@ function make_move() {
 		var index = min();
 		var targetx = index[0];
 		var targety = index[1];
-		console.log(index)
 		var x = get_my_x();
 		var y = get_my_y();
 		// we found an item! take it!
@@ -115,7 +113,6 @@ function make_move() {
 function min() {
 	var board = get_board();
 	items = itemLocations();
-	console.log(items)
 	var min = Math.abs(items[0][0][0] - get_my_x()) + Math.abs(items[0][0][1] - get_my_y());
 	var minIndex = 0;
 	for (var i = 1; i < items[0].length; i++) {
