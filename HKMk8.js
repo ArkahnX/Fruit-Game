@@ -1,3 +1,9 @@
+// http://www.scribd.com/jobs/botrace_bot/478
+//define functions to make jslint happy
+var get_number_of_item_types = get_number_of_item_types;
+var get_total_item_count = get_total_item_count;
+var get_board = get_board;
+var get_my_x = get_my_x;
 var items;
 var shortcutItems;
 var simpleList = [];
@@ -69,6 +75,19 @@ function opponent_distance(x, y) {
 	return Math.abs(x - get_my_x()) + Math.abs(y - get_my_y());
 }
 
+function typeOf(value) {
+	var s = typeof value;
+	if (s === "object") {
+		if (value) {
+			if (value instanceof Array) {
+				s = "array";
+			}
+		} else {
+			s = "null";
+		}
+	}
+	return s;
+}
 
 function clone(object) {
 	var newObj = (object instanceof Array) ? [] : {};
@@ -202,6 +221,19 @@ function remaining(item) {
 	return fruits[item] - get_my_item_count(item) - get_opponent_item_count(item);
 }
 
+function toVictory(array) {
+	var victory = [];
+	for(var i=0;i<array.length;i++) {
+		if(victory.length <= myVictory) {
+			var thisFruit = array[i][0].fruit;
+			var halfWay = Math.ceil(fruits[thisFruit] / 2);
+			if(get_my_item_count(thisFruit) < halfWay && get_opponent_item_count(thisFruit) < halfWay) {
+				victory.push(array[i]);
+			}
+		}
+	}
+	return victory;
+}
 
 function shouldCollect(item, simple) {
 	//should return false if more than half of the items are picked up
@@ -221,7 +253,51 @@ function shouldCollect(item, simple) {
 	}
 	return false;
 }
+function indexOf(x,y) {
+	for(var i=0;i<simpleList.length;i++) {
+		var string = simpleList[i].split(",");
+		if(parseInt(string[0],10) === x && parseInt(string[1],10) === y) {
+			return true;
+		}
+	}
+	return false;
+}
 
+function nearMe() {
+	var finds = 0;
+	var findsLocations = [];
+	var destination = min(itemLocations());
+	var destinationx = destination.x;
+	var destinationy = destination.y;
+	var destinationDistance = my_distance(destinationx,destinationy);
+	var x = get_my_x();
+	var y = get_my_y();
+	var minx = x - 2;
+	var maxx = x + 2;
+	var miny = y - 2;
+	var maxy = y + 2;
+	var board = get_board();
+	for (var i = minx; i <= maxx; i++) {
+		for (var e = miny; e <= maxy; e++) {
+			if (board[i] && board[i][e]) {
+				if (board[i][e] > 0) {
+					if(indexOf(i,e)) {
+						finds = finds+1;
+						findsLocations.push([i,e]);
+					}
+				}
+			}
+		}
+	}
+	for(var r=0;r<findsLocations.length;r++) {
+		if(my_distance(destinationx,destinationy,findsLocations[r][0],findsLocations[r][1]) < destinationDistance) {
+			destinationDistance = my_distance(destinationx,destinationy,findsLocations[r][0],findsLocations[r][1]);
+			destination.x = findsLocations[r][0];
+			destination.y = findsLocations[r][1];
+		}
+	}
+	return destination;
+}
 
 function make_move() {
 	items = itemLocations();
